@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>VehiSpot | Auth</title>
+    <link rel="stylesheet" href="{{ url_for('static',filename='css/login.css') }}">
+</head>
+<body>
+<div class="cont_principal">
+
+    <div class="cont_centrar">
+        <div class="cont_login">
+            <form id="loginForm">
+                <input type="hidden" value="signin" id="formType" name="formType">
+                <div class="cont_tabs_login">
+                    <ul class="ul_tabs">
+                        <li class="active"><a href="#" onclick="sign_in()">SIGN IN</a>
+                            <span class="linea_bajo_nom"></span>
+                        </li>
+                        <li><a href="#Registration" onclick="sign_up()">SIGN UP</a><span class="linea_bajo_nom"></span>
+                        </li>
+                    </ul>
+                </div>
+                <h4 style="text-align: center;display: none; color: red" id="errorMessage"></h4>
+                <h4 style="text-align: center;display: none; color: green" id="successMessage"></h4>
+                <div class="cont_text_inputs">
+                    <input type="text" class="input_form_sign " placeholder="NAME" name="name"/>
+
+                    <input type="email" class="input_form_sign d_block active_inp" placeholder="EMAIL" name="email"
+                           required/>
+
+                    <input type="password" class="input_form_sign d_block  active_inp" placeholder="PASSWORD"
+                           name="password" required/>
+                    <input type="password" class="input_form_sign" placeholder="CONFIRM PASSWORD"
+                           name="confirmPassword"/>
+                    <div class="rememberMe d_block">
+                        <p><input type="checkbox" name="rememberMe"/><label for="rememberMe">Remember Me!</label></p>
+                        <br>
+                    </div>
+                    <a href="#" class="link_forgot_pass d_block">Forgot Password ?</a>
+                </div>
+                <div class="cont_btn">
+                    <button type="submit" class="btn_sign">SIGN IN</button>
+
+                </div>
+
+            </form>
+        </div>
+
+    </div>
+
+
+</div>
+
+</body>
+<script src="{{ url_for('static',filename='js/login.js') }}"></script>
+</html>

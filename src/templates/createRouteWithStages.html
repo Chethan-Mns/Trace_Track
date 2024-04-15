@@ -1,0 +1,468 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Live Navigation</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+    <script src="https://unpkg.com/leaflet-routing-machine/dist/leaflet-routing-machine.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css"/>
+
+    <style>
+        #map {
+            height: 60vh;
+        }
+
+        .bus-icon {
+            width: 32px;
+            height: 32px;
+            background-image: url('https://cdn-icons-png.flaticon.com/512/5030/5030991.png'); /* Replace with the path to your bus icon image */
+            background-size: cover;
+            transform-origin: center center;
+            transition: transform 1s linear; /* Add a CSS transition for smoother rotation */
+        }
+
+        .trail-line {
+            color: red;
+            weight: 4;
+        }
+
+        .OperationContainer {
+            display: flex;
+            justify-content: center;
+            height: auto;
+        }
+
+        input {
+            padding: 3px;
+            font-size: 20px;
+        }
+
+        .leaflet-control-locate {
+            position: absolute;
+            background: white;
+            border-radius: 4px;
+            border: 1px solid #ccc;
+            box-shadow: 0 1px 7px rgba(0, 0, 0, 0.65);
+            display: block;
+            margin: 10px;
+            text-align: center;
+            width: 30px;
+            height: 30px;
+            line-height: 30px;
+            text-decoration: none;
+            color: black;
+            z-index: 1000;
+        }
+
+        #locateMe {
+            position: absolute; /* Set position to absolute */
+            top: 80px; /* Align to the top */
+            left: 10px; /* Align to the right */
+            background-color: #f2f2f2; /* Background color */
+            border: 1px solid #ccc;
+            box-shadow: 0 1px 7px rgba(0, 0, 0, 0.65);
+            border-radius: 4px;
+            padding: 7px; /* Add padding */
+            z-index: 1000;
+            margin: 10px;
+            cursor: pointer;
+        }
+
+        /* Styling for the stage input container */
+        .stage-input {
+            margin-bottom: 10px; /* Adds space between each stage input */
+            margin-top: 10px;
+        }
+
+        /* Styling for labels inside the stage input container */
+        .stage-input label {
+            margin-top: 5px; /* Adds space between labels */
+            font-weight: bold;
+            font-size: 20px /* Makes labels bold */
+        }
+
+        /* Styling for input fields inside the stage input container */
+        .stage-input input {
+            width: 15%; /* Adjusts the width of the input fields */
+            padding: 15px; /* Adds padding inside the input fields */
+            border: 1px solid #ccc; /* Adds a border around the input fields */
+            border-radius: 3px; /* Rounds the corners of the input fields */
+        }
+
+        .addBusForm input {
+            padding: 10px;
+            margin-bottom: 10px;
+            font-size: 17px;
+        }
+
+        .add-route-container {
+            background-color: #f0f0f0;
+            border-radius: 10px;
+            padding: 20px;
+            margin: 20px auto;
+            max-width: 100%;
+            box-shadow: rgba(50, 50, 93, .1) 0 2px 5px 0, rgba(0, 0, 0, .07) 0 1px 1px 0;
+            text-align: center;
+        }
+
+
+        /* Centered text styles */
+        .centered {
+            text-align: center;
+        }
+
+        .label {
+            display: inline-block;
+        }
+
+        /* Custom button styles */
+        .custom-button {
+            background-color: #405cf5;
+            border-radius: 6px;
+            border: none;
+            box-shadow: rgba(50, 50, 93, .1) 0 2px 5px 0, rgba(0, 0, 0, .07) 0 1px 1px 0;
+            color: #fff;
+            font-family: -apple-system, system-ui, "Segoe UI", Roboto, "Helvetica Neue", Ubuntu, sans-serif;
+            font-size: 16px; /* Adjust font size for smaller screens */
+            height: 44px;
+            line-height: 44px;
+            margin-top: 10px;
+            padding: 0 25px;
+            text-align: center;
+            text-transform: none;
+            transition: all .2s, box-shadow .08s ease-in;
+            width: auto;
+        }
+
+        .custom-button:focus {
+            box-shadow: rgba(50, 50, 93, .1) 0 2px 5px 0, rgba(0, 0, 0, .07) 0 1px 1px 0, rgba(50, 151, 211, .3) 0 0 0 4px;
+        }
+    </style>
+</head>
+<body>
+<div id="map"></div>
+<div id="locateMe">
+    <a role="button" title="Locate Me" href="#">
+        <span class="fa fa-location-arrow"></span>
+    </a>
+    <!-- Content for the container -->
+</div>
+<div class="add-route-container">
+    <div id="waypoints-form" class="centered">
+        <label for="num-stages">Stages (Waypoints):</label>
+        <div id="stage-inputs">
+            <div class="stage-input">
+                <label>Stage:</label>
+                <input type="text" id="stage-name" placeholder="Enter Stage Name...">
+                <input type="text" id="stage-coordinates" placeholder="Enter Stage Coordinates">
+                <button class="custom-button" onclick="addStage()">Add</button>
+            </div>
+        </div>
+        <button type="button" class="custom-button" id="calculateRoute" onclick="calculateRoute()">Calculate Route
+        </button>
+    </div>
+</div>
+
+<script>
+    function capitalizeFirstLetter(string) {
+        return string.charAt(0).toUpperCase() + string.slice(1);
+    }
+
+    function postData(url = '', data = {}) {
+        // Default options are marked with *
+        return fetch(url, {
+            method: 'POST', // *GET, POST, PUT, DELETE, etc.
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(data) // body data type must match "Content-Type" header
+        })
+            .then(response => response.json()); // parses JSON response into native JavaScript objects
+    }
+
+    // Function to make a GET request
+    function getData(url = '') {
+        // Default options are marked with *
+        return fetch(url)
+            .then(response => response.json()); // parses JSON response into native JavaScript objects
+    }
+
+
+    let getLocationPromise = () => {
+        return new Promise(function (resolve, reject) {
+            // Promisifying the geolocation API
+            console.log(navigator);
+            navigator.geolocation.getCurrentPosition(
+                (position) => resolve(new Array(position.coords.latitude, position.coords.longitude)),
+                (error) => reject(error)
+            );
+        });
+    };
+
+    // Example GeoJSON data structure:
+    const collegesGeoJSON = {
+        "type": "FeatureCollection",
+        "features": [
+            {
+                "type": "Feature",
+                "properties": {
+                    "name": "NBKR Institute Of Science & Technology"
+                },
+                "geometry": {
+                    "type": "Point",
+                    "coordinates": [14.028572109658956, 80.0218235993725]
+                }
+            }]
+    };
+    const collegeMarkerStyle = {
+        radius: 8,
+        fillColor: "blue",
+        color: "#fff",
+        weight: 100,
+        opacity: 1,
+        fillOpacity: 0.8
+    };
+    const map = L.map('map').setView([14.028572109658956, 80.0218235993725], 15); // Set initial map view
+    var selectedLocation = L.marker([0, 0], {draggable: true});
+    selectedLocation.addTo(map);
+    document.getElementById('locateMe').addEventListener('click', async () => {
+        const curLoc = await getLocationPromise();
+        console.log(curLoc)
+        map.setView(curLoc)
+        selectedLocation.setLatLng(curLoc);
+        document.getElementById('stage-coordinates').value = new Array(curLoc[0].toFixed(8), curLoc[1].toFixed(8));
+
+
+    });
+    var customIcon = L.icon({
+        iconUrl: '{{ url_for('static',filename='images/college.ico') }}', // URL to your image
+        iconSize: [50, 50], // size of the icon
+        iconAnchor: [22, 94], // point of the icon which will correspond to marker's location
+        popupAnchor: [-3, -76] // point from which the popup should open relative to the iconAnchor
+    });
+    L.marker([14.028572109658956, 80.0218235993725], {icon: customIcon}).addTo(map).bindPopup("NBKR Institute of Science & Technology");
+    //L.geoJSON(collegesGeoJSON, {
+    //pointToLayer: function (feature, latlng) {
+    // return L.circleMarker(latlng, collegeMarkerStyle);
+    //}
+    //}).addTo(map);
+    // Add the OpenStreetMap tile layer
+    const openStreetMap = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: 'Map data &copy; <a href="https://www.openstreetmap.org/">OpenStreetMap</a> contributors',
+        maxZoom: 20,
+    }).addTo(map);
+    const googleSatellite = L.tileLayer('https://{s}.google.com/vt?lyrs=y&x={x}&y={y}&z={z}', {
+        maxZoom: 20,
+        subdomains: ['mt0', 'mt1', 'mt2', 'mt3']
+    });
+
+    const googleStreets = L.tileLayer('https://{s}.google.com/vt?lyrs=m&x={x}&y={y}&z={z}', {
+        maxZoom: 20,
+        subdomains: ['mt0', 'mt1', 'mt2', 'mt3']
+    });
+
+    const baseMaps = {
+        "OpenStreetMap": openStreetMap,
+        "Google Streets": googleStreets,
+        "Google Satellite": googleSatellite
+    };
+    L.control.layers(baseMaps).addTo(map);
+    let allStages = [];
+    let stageMarkers = [];
+    let assignedStage = [];
+    let routingControl = L.Routing.control({});
+    let routeDetails = {};
+    // Add the marker to the map
+    map.on('click', function (e) {
+        var latlng = e.latlng;
+        selectedLocation.setLatLng(latlng);
+        document.getElementById('stage-coordinates').value = new Array(latlng.lat.toFixed(8), latlng.lng.toFixed(8));
+
+    });
+    selectedLocation.on('drag', function (e) {
+        var latlng = e.latlng;
+        selectedLocation.setLatLng(latlng);
+        document.getElementById('stage-coordinates').value = new Array(latlng.lat.toFixed(8), latlng.lng.toFixed(8));
+    });
+
+    {#document.getElementById('addStage').addEventListener('click', (e) => {#}
+    {#    e.preventDefault();#}
+    {#    var stageName = document.getElementById('stageName').value;#}
+    {#    let marker = L.marker(curStage, {draggable: false}).addTo(map).bindPopup(stageName, {#}
+    {#        autoClose: false,#}
+    {#        closeOnClick: false#}
+    {#    }).openPopup();#}
+    {#    stageMarkers.push(marker);#}
+    {#    allStages.push([curStage, stageName]);#}
+    {#    selectedLocation.setLatLng([0, 0]);#}
+    //});
+
+    function showShortestPath(wayPoints, edit = false, routeId = "", areaName = "", routeName = "") {
+        console
+        stageMarkers.forEach(function (marker) {
+            map.removeLayer(marker); // Remove each marker from the map
+        });
+        assignedStage = stageMarkers;
+        stageMarkers = [];
+        map.removeControl(routingControl);
+        routingControl = L.Routing.control({
+            waypoints: wayPoints,
+            lineOptions: {
+                styles: [{color: 'blue', opacity: 0.6, weight: 15}]
+            }
+        }).addTo(map);
+        routingControl.on('routesfound', function (e) {
+            // Get the routes from the event object
+            var routes = e.routes;
+            // Iterate over each route
+            routeDetails.routes = routes;
+            for (var i = 0; i < routes[0].waypoints.length; i++) {
+                allStages[i][0] = [routes[0].waypoints[i].latLng.lat, routes[0].waypoints[i].latLng.lng];
+            }
+        });
+        document.getElementsByClassName('leaflet-routing-container')[0].remove();
+        if (document.getElementById('addBusForm'))
+            return 0;
+        const submitButton = `<form class="addBusForm" id="addBusForm">
+        <h4>Enter Route Details </h4>
+        <input type="text" name="areaName" placeholder="Enter Route/Area Name..." value="${areaName}"><br>
+        <input type="text" name="routeName" placeholder="Enter subName like Via Bustand... " value="${routeName}"<br>
+        </form><button type="button" class="custom-button" onclick="submitRoute(${edit},'${routeId}')">Create Route</button>`;
+        document.getElementsByClassName('add-route-container')[0].insertAdjacentHTML('beforeend', submitButton);
+    }
+
+    {#document.getElementById('findRoute').addEventListener('click', (e) => {#}
+    {#    e.preventDefault();#}
+    {#    showShortestPath(allStages.map(function (stage) {#}
+    {#        return stage[0]#}
+    {#    }));#}
+    //});
+    {#document.getElementById('submitRoute').addEventListener('click', (e) => {#}
+    {#    e.preventDefault();#}
+    {#    var routeForm = document.getElementById('addBusForm');#}
+    {#    let formData = new FormData(routeForm);#}
+    {#    routeDetails.allStages = allStages;#}
+    {#    routeDetails = {...routeDetails, ...Object.fromEntries(formData)};#}
+    {#    console.log(routeDetails)#}
+    {#    // Example POST request#}
+    {#    postData('https://vehispot.onrender.com/users/addroute', routeDetails)#}
+    {#        .then(data => {#}
+    {#            console.log(data); // JSON data parsed by `response.json()` call#}
+    {#        })#}
+    {#        .catch(error => {#}
+    {#            console.error('Error:', error);#}
+    {#        });#}
+    {##}
+    //});
+
+    function updateStages(stageName, stageCoord) {
+        "use strict";
+        var stageInputs = document.getElementById("stage-inputs");
+        var stageInput = `
+            <div class="stage-input" id="stageInput-${allStages.length}">
+            <label for="stage-${allStages.length}">Stage ${allStages.length}:</label>
+            <input type="text" id="stage-${allStages.length}-name" value="${stageName}" onblur="changeStageName(this.id)">
+            <input type="text" id="stage-${allStages.length}-coordinates" value="${stageCoord}" readonly onfocus="changeStageCoord(this.id)"> <button id="stage-${allStages.length}-remove" class="custom-button" onclick="removeStage(this.id)"> Remove</button></div>
+        `;
+        stageInputs.insertAdjacentHTML('beforebegin', stageInput);
+    }
+
+
+    function addStage() {
+        var stageName = document.getElementById('stage-name').value;
+        var stageCoord = document.getElementById('stage-coordinates').value;
+        stageCoord = stageCoord.split(",").map(parseFloat);
+        allStages.push([stageCoord, capitalizeFirstLetter(stageName)]);
+        updateStages(capitalizeFirstLetter(stageName), stageCoord);
+
+        let marker = L.marker(stageCoord, {draggable: false}).addTo(map).bindPopup(capitalizeFirstLetter(stageName), {
+            autoClose: false, closeOnClick: false
+        }).openPopup();
+        stageMarkers.push(marker);
+        selectedLocation.setLatLng([0, 0]);
+        document.getElementById('stage-name').value = '';
+        document.getElementById('stage-coordinates').value = '';
+        console.log(allStages)
+    }
+
+
+    function calculateRoute(edit = false, routeId = "", areaName = "", routeName = "") {
+        showShortestPath(allStages.map(function (stage) {
+            return stage[0]
+        }), edit, routeId, areaName, routeName);
+    }
+
+    function submitRoute(edit = false, routeId = "") {
+        var routeForm = document.getElementById('addBusForm');
+        let formData = new FormData(routeForm);
+        routeDetails.allStages = allStages;
+        routeDetails = {...routeDetails, ...Object.fromEntries(formData)};
+        console.log(routeDetails);
+        if (edit) {
+            routeDetails.routeId = routeId;
+            postData('https://vehispot.onrender.com/users/updateData/?type=route', routeDetails).then(data => {
+                console.log(data)
+                alert("Route Updated Successfully.");
+                return 0;
+            });
+            window.location.href = '/adminDashboard/?open=route';
+            return 0;
+        }
+        postData('https://vehispot.onrender.com/users/addroute', routeDetails)
+            .then(data => {
+                console.log(data);
+                alert("Route Created Successfully.");// JSON data parsed by `response.json()` call
+                window.location.href = '/adminDashboard/?open=route';
+            })
+            .catch(error => {
+                alert(error);
+                console.error('Error:', error);
+            });
+    }
+
+    {% set v=routeData |safe if routeData else 0 %}
+    const routeData = {{ v }};
+    if (routeData) {
+        console.log(routeData);
+        routeData.routeStageWithNames.forEach(stage => {
+            document.getElementById('stage-name').value = stage.stageName;
+            document.getElementById('stage-coordinates').value = stage.stageCoord;
+            addStage();
+        });
+        document.getElementById('calculateRoute').setAttribute('onclick', `calculateRoute(edit = ${true}, routeId = '${routeData.routeId}',areaName='${routeData.areaName}',routeName='${routeData.routeName}')`)
+    }
+
+    function changeStageName(sid) {
+        var newValue = document.getElementById(sid).value;
+        console.log(newValue, sid.split('-'))
+        allStages[parseInt(sid.split('-')[1]) - 1][1] = capitalizeFirstLetter(newValue);
+        stageMarkers[parseInt(sid.split('-')[1]) - 1].bindPopup(newValue)
+    }
+
+    function changeStageCoord(sid) {
+        stageMarkers[parseInt(sid.split('-')[1]) - 1].dragging.enable();
+        stageMarkers[parseInt(sid.split('-')[1]) - 1].on('dragend', function (event) {
+            document.getElementById(sid).value = [event.target.getLatLng().lat, event.target.getLatLng().lng];
+            stageMarkers[parseInt(sid.split('-')[1]) - 1] = event.target;
+            allStages[parseInt(sid.split('-')[1]) - 1][0] = [event.target.getLatLng().lat, event.target.getLatLng().lng];
+        });
+    }
+
+    function removeStage(sid) {
+        if (stageMarkers.length === 0 && assignedStage.length !== 0) {
+            console.log('hello');
+            map.removeControl(routingControl);
+            assignedStage.forEach(mark => mark.addTo(map));
+            stageMarkers = assignedStage;
+        }
+        console.log(parseInt(sid.split('-')[1]) - 1);
+        console.log(stageMarkers);
+        map.removeLayer(stageMarkers[parseInt(sid.split('-')[1]) - 1]);
+        stageMarkers.pop(parseInt(sid.split('-')[1]) - 1);
+        document.getElementById("stageInput-" + sid.split('-')[1]).remove();
+        allStages.pop(parseInt(sid.split('-')[1]) - 1);
+    }
+</script>
+</body>
+</html>

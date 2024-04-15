@@ -1,0 +1,103 @@
+{% extends 'base.html' %}
+{% block home %}
+    <script src="https://cdn.jsdelivr.net/npm/shufflejs@5.4.1/dist/shuffle.min.js"></script>
+    <div class="container-fluid mt-4 pl-md-4">
+        <div class="row">
+            <div class="col-8 col-md-9">
+                <p class="hellouser-text">Hello , {{ current_user }}!</p>
+            </div>
+            {#            <div class="col-6  col-md-6">#}
+            {#                <div class=" search-field-bg">#}
+            {#                    <form class="form-bg">#}
+            {#                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"#}
+            {#                             stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"#}
+            {#                             class="lucide lucide-search">#}
+            {#                            <circle cx="11" cy="11" r="8"/>#}
+            {#                            <path d="m21 21-4.3-4.3"/>#}
+            {#                        </svg>#}
+            {#                        <input class="form-control" type="search" placeholder="Search Vehicle" aria-label="Search">#}
+            {#                    </form>#}
+            {#                </div>#}
+            {#            </div>#}
+            <div class="col-4 col-md-3">
+                <div class=" bell-icon">
+                    <!-- Button trigger modal -->
+                    <button class="btn" data-toggle="modal" data-target="#notifications">
+                        <img src="{{ url_for('static',filename='images/Alarm.png') }}"/>
+                    </button>
+
+
+                    <!-- Modal -->
+                    <div class="modal fade" id="notifications" tabindex="-1" aria-labelledby="notifications"
+                         aria-hidden="true">
+                        <div class="modal-dialog">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h5 class="modal-title" id="notifications">Alerts!</h5>
+                                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                        <span aria-hidden="true">&times;</span>
+                                    </button>
+                                </div>
+                                <div class="modal-body">
+                                    <div class="notifications-boxes-bg">
+                                        <div class="notifications-boxes">
+
+                                        </div>
+                                        <div class="notifications-boxes">
+
+                                        </div>
+                                        <div class="notifications-boxes">
+
+                                        </div>
+                                        <div class="notifications-boxes">
+
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-12">
+                <p class="frequent-text">Frequent Locations</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="frequent-locations-bg mt-3 shuffle-btn-group">
+        <label class="frequent-locations active">
+            <input type="radio" name="shuffle-filter" id="all" value="all">
+            <span class="frequent-locations-sub-text">All</span>
+        </label>
+        {% for area in allAreas %}
+            <label class="frequent-locations">
+                <input type="radio" name="shuffle-filter" id="{{ area }}" value="{{ area }}">
+                <span class="frequent-locations-sub-text">{{ area }}</span>
+            </label>
+        {% endfor %}
+    </div>
+    <div class="buses-main-bg mb-5 m-md-3 pb-md-5 pb-3 shuffle-wrapper">
+        {% for bus in allRoutes %}
+            <div class="buses-sub-bg shuffle-item" data-groups="[&quot;{{ bus['Route Name'] }}&quot;]"
+                 onclick="location.href='/trackVehicleOnLine/{{ bus['busId'] }}'">
+                <div class="busIcon">
+                    <img src="{{ url_for('static',filename='images/School bus.png') }}"/>
+                </div>
+                <div class="bus-details-bg">
+                    <p class="bus-no">Bus No: {{ bus['Number'] }} </p>
+                    <p class="driver-name"> Driver Name: {{ bus['Driver Name'] }}</p>
+                    <p class="driver-name">Route Name: {{ bus['Route Name'] }} ({{ bus['Sub Route Name'] }})</p>
+                    <p class="driver-name">Bus Active: <span>{{ bus['Bus Running'] }}</span></p>
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+    <script src="{{ url_for('static',filename='js/shuffle/shuffle.min.js') }}" defer></script>
+    <script src="{{ url_for('static',filename='js/buses-shuffle.js') }}"></script>
+{% endblock %}

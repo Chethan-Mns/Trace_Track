@@ -1,0 +1,400 @@
+html::-webkit-scrollbar {
+    display: none;
+}
+
+
+html {
+    -ms-overflow-style: none;
+    /* IE and Edge */
+    scrollbar-width: none;
+    /* Firefox */
+}
+
+/* nav starts here */
+
+
+@media (min-width: 991px) {
+
+    /*large devices */
+    .nav-logo-text {
+        margin: 1rem 0 0.5rem 3rem;
+        font-size: 40px;
+    }
+
+}
+
+@media (max-width: 990px) {
+
+    /*medium devices*/
+    .nav-logo-text {
+        margin: 1rem 0 0.5rem 1rem;
+        font-size: 30px;
+    }
+}
+
+@media (max-width: 768px) {
+
+    /*small devices*/
+    .nav-logo-text {
+        margin: 1rem 0 0.5rem 1rem;
+        font-size: 30px;
+    }
+
+}
+
+.navbar {
+    background-color: #f3f8ff;
+    height: 5.5rem;
+    z-index: 1001;
+    padding: 0;
+}
+
+.nav-logo-text {
+    font-family: 'Source Serif Pro', Helvetica, sans-serif;
+    font-weight: 400;
+    color: #000000 !important;
+
+}
+
+.nav-sub-text {
+    font-family: "Inter-ExtraBold", Helvetica;
+    font-weight: 700;
+    color: #000000;
+    font-size: 19px;
+}
+
+.signin-button {
+    background-color: #fc2110;
+    border: unset;
+    border-radius: 42px;
+    font-weight: 700;
+    color: #ffffff;
+    font-size: 15px;
+    height: 3rem;
+    width: 5.5rem;
+
+}
+
+.signin-button:focus {
+    border: unset;
+    outline: none;
+}
+
+.navbar-nav {
+    display: flex;
+    justify-content: space-evenly;
+    align-items: center;
+    gap: 15px;
+
+}
+
+.navbar-collapse {
+    background-color: #f3f8ff;
+
+}
+
+
+/* nav  ended here */
+@media (min-width: 992px) {
+    /*large devices */
+
+    .hello-user-main-bg {
+        margin: 2em 3rem;
+        background-color: aqua;
+
+    }
+
+    .hellouser-text {
+        font-size: 32px;
+
+    }
+
+
+}
+
+
+@media (max-width: 991px) {
+    .hellouser-text {
+        font-size: 22px;
+
+    }
+
+    /*medium devices*/
+}
+
+@media (max-width: 768px) {
+    .hellouser-text {
+        font-size: 20px;
+
+    }
+
+    /*small devices*/
+}
+
+
+.hellouser-text {
+    font-family: 'Pacifico', sans-serif;
+    font-weight: 400;
+    color: #000000;
+    letter-spacing: 0;
+}
+
+.search-field-bg {
+    display: flex;
+    justify-content: start;
+    align-items: center;
+    background-color: #d9d9d984;
+    border-radius: 10px;
+    padding: 0 0 0 0.5em;
+    max-width: 35%;
+    min-width: 112px;
+}
+
+.form-bg {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.form-control {
+    background-color: transparent !important;
+    border: none;
+    outline: none;
+
+}
+
+.form-control:focus {
+    border: unset;
+    outline: unset;
+}
+
+.bell-icon {
+    text-align: end;
+    padding-right: 2em;
+}
+
+.frequent-text {
+    font-family: "Inter-SemiBold", Helvetica;
+    font-weight: 600;
+    color: #000000;
+    font-size: 16px;
+}
+
+.frequent-locations-bg {
+    margin: 1em 0.5em;
+    display: flex;
+    gap: 15px;
+    overflow-x: scroll;
+    scroll-behavior: smooth;
+    padding: 0 1em 0 1em;
+
+}
+
+.frequent-locations-bg::-webkit-scrollbar {
+    display: none;
+}
+
+
+.frequent-locations-bg {
+    -ms-overflow-style: none;
+    /* IE and Edge */
+    scrollbar-width: none;
+    /* Firefox */
+}
+
+.frequent-locations {
+    background-color: #F4F2F2;
+    border-radius: 15px;
+    box-shadow: 0px 4px 4px #00000040;
+    width: 150px;
+    height: 40px;
+    cursor: pointer;
+    text-align: center;
+    padding: 0.3em 1em;
+    border: unset;
+    outline: unset;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+}
+
+label.frequent-locations.active {
+    color: white;
+    background-color: #4335DE !important;
+}
+
+input[type="radio"] {
+    position: absolute;
+    opacity: 0;
+}
+
+.frequent-locations:hover {
+    outline: unset;
+    border: unset;
+    background-color: #4335de2b;
+
+}
+
+input[type="radio"]:checked + .frequent-locations {
+    outline: unset;
+    border: unset;
+    background-color: #4335DE !important;
+    color: #FFFFFF;
+}
+
+.frequent-locations-sub-text {
+    font-family: "Inter-ExtraBold", Helvetica;
+    font-weight: 600;
+    font-size: 16px;
+    margin: 5px;
+
+}
+.notifications-boxes-bg {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+.notifications-boxes {
+    width: 100%;
+    height: 65px;
+    background: #D9D9D9;
+    border-radius: 20px
+
+}
+
+
+/* buses page starts here */
+
+
+
+.buses-main-bg {
+    background-color: #F3F8FF;
+    height: 100%;
+    display: flex;
+    gap: 15px;
+    flex-wrap: wrap;
+    justify-content: space-around;
+    border-radius: 20px;
+    box-shadow: 0px 4px 4px #00000040;
+
+}
+
+.buses-sub-bg {
+    width: 340px;
+    height: 250px;
+    padding: 10px;
+    margin: 20px;
+    position: relative;
+    background-color: #fdfeff;
+    border-radius: 15px;
+    box-shadow: 0px 4px 4px #00000040;
+    cursor: pointer;
+}
+
+.bus-details-bg {
+    position: absolute;
+    bottom: 15%;
+    left: 10%;
+}
+
+.bus-no {
+    color: black;
+    font-size: 14px;
+    font-family: Inter;
+    font-weight: 800;
+    word-wrap: break-word
+}
+
+.busIcon {
+    text-align: center;
+}
+
+.driver-name {
+    color: black;
+    font-size: 14px;
+    font-family: Inter;
+    font-weight: 800;
+    word-wrap: break-word
+}
+
+/* buses page ends here */
+
+/* footer starts here */
+
+.footer-main-bg {
+    height: 100%;
+    background-color: #f3f8ff;
+    padding: 6rem 1rem 0.1rem 3rem;
+
+
+}
+
+.innosapient-img {
+    width: 112px;
+    height: 110px;
+    margin-bottom: 1rem;
+}
+
+.footer-sub-first-text {
+    font-size: 14px;
+    width: 277.59px;
+    color: #58595D;
+    font-size: 14px;
+    font-family: Inter;
+    font-weight: 500;
+    line-height: 22px;
+    word-wrap: break-word;
+}
+
+.footer-sub-second-heading {
+    color: #2E2F35;
+    font-size: 13px;
+    font-family: Inter;
+    font-weight: 700;
+    text-transform: uppercase;
+    line-height: 18px;
+    letter-spacing: 1.50px;
+    word-wrap: break-word;
+    margin: 0 0 2rem 0;
+}
+
+
+.footer-sub-second-sub-text {
+    color: #2E2F35;
+    font-size: 16px;
+    font-family: Inter;
+    font-weight: 500;
+    line-height: 30px;
+    word-wrap: break-word;
+}
+
+.footer-sub-third-heading {
+    color: #2E2F35;
+    font-size: 12px;
+    font-family: Inter;
+    font-weight: 700;
+    text-transform: uppercase;
+    line-height: 18px;
+    letter-spacing: 1.50px;
+    word-wrap: break-word;
+}
+
+.footer-sub-third-mail {
+    color: #2E2F35;
+    font-size: 15px;
+    font-family: Inter;
+    font-weight: 500;
+    line-height: 18px;
+    word-wrap: break-word;
+    padding-left: 3px;
+}
+
+.copy-rights {
+    color: #58595D;
+    font-size: 14px;
+    font-family: Inter;
+    font-weight: 500;
+    line-height: 22px;
+    word-wrap: break-word;
+    padding: 0 0 5px 0;
+}

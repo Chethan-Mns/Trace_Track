@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en" >
+<head>
+  <meta charset="UTF-8">
+  <title>Live Tracking</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="https://use.fontawesome.com/c47bc38e87.js"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/meyer-reset/2.0/reset.min.css">
+<link rel="stylesheet" href="{{url_for('static',path='/styles.css')}}">
+<link rel="stylesheet" href="{{url_for('static',path='/bar.css')}}">
+
+</head>
+<body>
+  <section class="colored-section" id="title">
+
+    <div class="container-fluid">
+
+      <!-- Nav Bar -->
+<div
+  id="app"
+  class="progressClasses"
+>
+  <div id="stage_name">
+    </div><br><br><br>
+  <div class="progress__bg">
+    {% for bar in range(1,totalpoints) %}
+    <div class="stage-bar stage-bar--{{bar}}">
+      <div></div>
+      <div></div>
+    </div>
+
+    {% endfor %}
+
+  </div>
+  <div class="stage-points">
+    {% for stage_index in range(stages | length) %}
+    <div class="progress__step progress__step--{{stage_index}}">
+      <div class="progress__indicator">
+        <i class="fa fa-check"></i>
+      </div>
+      <div class="progress__label">
+        {{stages[stage_index]['label']}}
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+  </div>
+
+<!-- partial -->
+    </div>
+  </section>
+</body>
+<script>
+
+  let cur_stage=0;
+    function change_stages(stage_index) {
+      console.log(cur_stage);
+      if(document.getElementsByClassName('progress__step').length<=stage_index){
+        return 0;
+      }
+      if(cur_stage>stage_index){
+        for (var stage = cur_stage; stage > stage_index; stage--) {
+          document.getElementsByClassName('progress__step--'+stage)[0].classList.remove('progress__step--complete')
+          }
+        for(var bar_id=cur_stage;bar_id>stage_index;bar_id--)
+        document.getElementsByClassName('stage-bar--'+bar_id)[0].classList.remove('active');
+        cur_stage=stage_index;
+        return 0;
+      }
+      if (stage_index>0){
+        for(var bar_id=1;bar_id<=stage_index;bar_id++)
+        document.getElementsByClassName('stage-bar--'+bar_id)[0].classList.add('active')
+      }
+    for (var stage = cur_stage; stage<=stage_index; stage++) {
+      document.getElementsByClassName('progress__step--'+stage)[0].classList.add('progress__step--complete')
+    }
+    cur_stage=stage_index;
+  }
+  {% if admin %}
+  w = new Worker("{{url_for('static',path='/update_loc_worker.js')}}");
+    w.postMessage({{route_id|safe}});
+    w.onmessage = function(event) {
+      console.log(event.data)
+      change_stages(event.data);
+    };
+  {% else %}
+   var source = new EventSource("/stream/{{route_id}}/");
+    source.onmessage=(event)=>{
+      console.log(JSON.parse(event.data))
+        change_stages(JSON.parse(event.data).data.loc_index)
+    };
+  {% endif %}
+    {% if admin %}
+      let getLocationPromise = () => {
+            return new Promise(function (resolve, reject) {
+                // Promisifying the geolocation API
+                navigator.geolocation.getCurrentPosition(
+                    (position) => resolve(position),
+                    (error) => reject(error)
+                );
+            });
+        };
+    let cur_loc;
+    let prev_loc;
+     let position;
+
+    const protocol = window.location.protocol.includes('https') ? 'wss' : 'ws';
+    ws = new WebSocket(`${protocol}://${location.host}/EstablishCon/{{route_id}}/`);
+    ws.onopen = () => ws.send(JSON.stringify({"data":"start"}));
+    ws.onmessage = async function (event) {
+      var Response = JSON.parse(event.data);
+        console.log(Response);
+        if(Response.status){
+            if(Response.id=='success'){
+              position=await getLocationPromise();
+              cur_loc = new Array(position.coords.latitude, position.coords.longitude);
+              //console.log(new Array(position.coords.latitude,position.coords.longitude))
+              ws.send(JSON.stringify({"data": cur_loc}));
+                return 0;
+            }
+        }
+        position=await getLocationPromise();
+        cur_loc = new Array(position.coords.latitude, position.coords.longitude);
+        //console.log(new Array(position.coords.latitude,position.coords.longitude))
+        ws.send(JSON.stringify({"data": cur_loc}));
+        };
+      {% endif %}
+  change_stages({{start_stage_index | safe}})
+
+</script>
+</body>
+</html>

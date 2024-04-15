@@ -1,0 +1,174 @@
+{% extends 'base.html' %}
+{% block trackOnLine %}
+    <link rel="stylesheet" href="{{ url_for('static',filename='css/routemap.css') }}">
+<div>
+    <p class="routemap-text">
+        Route Map:
+    </p>
+</div>
+<div class="map-main-bg" id="lineContainer">
+    <div class=" bus-details-track">
+        <div class="">
+            <p class="driver-name"> Driver Name: {{ driverName }} </p>
+            <p class="bus-no">Bus No: {{ busNumber }} </p>
+            <p class="driver-name">No. of Stages : {{ stagesOfRoute |length }} </p>
+            <p class="bus-no">Current Stage: <span
+                    id="curStage">{{ stagesOfRoute[curStage]['stageName'] | capitalize }}</span></p>
+            <p class="bus-no">Bus Speed: <span id="speed">0</span></p>
+        </div>
+    </div>
+    <div class="live-track-btn-bg">
+        <button class="live-track-btn" onclick="location.href='/trackVehicleOnMap/{{ busId }}'">
+            Track On Map
+        </button>
+    </div>
+</div>
+<script>
+
+    let flipLine;
+
+    function changeStage(stageNumber, percentage, coveredD, remainD, moveD, totStages) {
+        console.log(stageNumber, percentage, moveD);
+        if (moveD === "DOWN" || moveD === "BDOWN") {
+            console.log('hh')
+            if (flipLine == undefined || flipLine === "UP") {
+                if (document.getElementById("dynamicLine")) {
+                    document.getElementById("dynamicLine").remove()
+                }
+
+                let lineHtml = `<div class="track-map-main-bg" id="dynamicLine">
+        {% for stage in stagesOfRoute %}
+            <div id="{{ loop.index-2 }}0"></div>
+            <div id="{{ loop.index-2 }}1"></div>
+            <div id="{{ loop.index-2 }}2"></div>
+            <div id="{{ loop.index-2 }}3"></div>
+            <div id="{{ loop.index-2 }}4"></div>
+            <div id="{{ loop.index-2 }}5"></div>
+            <div>
+                <div class="active" id="{{ loop.index-1 }}">
+                </div>
+                <h6 class="location-names" id="name{{ loop.index-1 }}">{{ stage.stageName }} </h6>
+                <div class="loaction-timings-bg">
+                    <p class="loaction-timing" id="reachTime{{ loop.index-1 }}">0</p>
+                </div>
+            </div>
+        {% endfor %}
+        <div id="{{ (stagesOfRoute | length)-1 }}0"></div>
+        <div id="{{ (stagesOfRoute | length)-1 }}1"></div>
+        <div id="{{ (stagesOfRoute | length)-1 }}2"></div>
+        <div id="{{ (stagesOfRoute | length)-1 }}3"></div>
+        <div id="{{ (stagesOfRoute | length)-1 }}4"></div>
+        <div id="{{ (stagesOfRoute | length)-1 }}5"></div>
+
+    </div>`
+                document.getElementById('lineContainer').insertAdjacentHTML('afterbegin', lineHtml);
+                flipLine = "DOWN";
+            }
+            for (var i = 0; i <= stageNumber; i++) {
+                if (document.getElementById(i)) {
+                    document.getElementById(i).style.backgroundColor = 'green';
+                }
+            }
+        } else if (moveD === "UP" || moveD === "BUP") {
+            if (flipLine == undefined || flipLine === "DOWN") {
+                if (document.getElementById("dynamicLine")) {
+                    document.getElementById("dynamicLine").remove()
+                }
+
+                let lineHtml = `<div class="track-map-main-bg" id="dynamicLine">
+        {% for stage in stagesOfRoute[::-1] %}
+            <div id="{{ stagesOfRoute|length - loop.index+1 }}0"></div>
+            <div id="{{ stagesOfRoute|length - loop.index+1 }}1"></div>
+            <div id="{{ stagesOfRoute|length - loop.index+1 }}2"></div>
+            <div id="{{ stagesOfRoute|length - loop.index+1 }}3"></div>
+            <div id="{{ stagesOfRoute|length - loop.index+1 }}4"></div>
+            <div id="{{ stagesOfRoute|length - loop.index+1 }}5"></div>
+            <div>
+                <div class="active" id="{{ stagesOfRoute|length - loop.index }}">
+                </div>
+                <h6 class="location-names" id="name{{ loop.index+1 }}">{{ stage.stageName }} </h6>
+                <div class="loaction-timings-bg">
+                    <p class="loaction-timing" id="reachTime{{ loop.index+1 }}">0</p>
+                </div>
+            </div>
+        {% endfor %}
+        <div id="{{ 0 }}0"></div>
+        <div id="{{ 0 }}1"></div>
+        <div id="{{ 0 }}2"></div>
+        <div id="{{ 0 }}3"></div>
+        <div id="{{ 0 }}4"></div>
+        <div id="{{ 0 }}5"></div>
+
+    </div>`;
+                document.getElementById('lineContainer').insertAdjacentHTML('afterbegin', lineHtml);
+                flipLine = "UP";
+            }
+            for (var i = totStages - 1; i >= stageNumber; i--) {
+                if (document.getElementById(i)) {
+                    document.getElementById(i).style.backgroundColor = 'green';
+                }
+            }
+        }
+
+        let divId;
+        if (Math.round(6 * (percentage / 100)) >= 6) {
+            divId = stageNumber.toString() + '5';
+
+        } else {
+            divId = stageNumber.toString() + Math.round(6 * (percentage / 100))
+        }
+
+        console.log(stageNumber.toString() + Math.round(6 * (percentage / 100)));
+        const busIcon = document.getElementById('station');
+        if (busIcon) {
+            busIcon.remove();
+        }
+        document.getElementById(divId).innerHTML = `<div id="station">
+              <img src="{{ url_for('static',filename='images/Bus.png')}}" class="img-bus-station"/><span class="tooltiptext">Distance Away From Previous Stage: ${(coveredD / 1000).toFixed(2)}<br>Distance To Reach Next stage: ${(remainD / 1000).toFixed(2)}</span></div>`
+    }
+
+    function getCookie(cookieName) {
+        "use strict";
+        const name = cookieName + "=";
+        const decodedCookie = decodeURIComponent(document.cookie);
+        const cookieArray = decodedCookie.split(';');
+        for (let i = 0; i < cookieArray.length; i++) {
+            let cookie = cookieArray[i];
+            while (cookie.charAt(0) == ' ') {
+                cookie = cookie.substring(1);
+            }
+            if (cookie.indexOf(name) == 0) {
+                return cookie.substring(name.length, cookie.length);
+            }
+        }
+        return "";
+    }
+    // Create a web worker for handling location updates
+    const locationUpdaterWorker = new Worker("{{ url_for('static', filename='/update_loc_worker.js') }}");
+
+    // Send a message to the worker with routeId data
+    const routeId = '{{ busId | safe }}';
+    locationUpdaterWorker.postMessage({"routeId": routeId, "token": getCookie('token')});
+
+    // Listen for messages from the worker
+    locationUpdaterWorker.onmessage = function (event) {
+        // Log the received data from the worker
+        console.log("Received location update:", event.data);
+        if (event.data.stageDetails !== "Calibrating Again") {
+            console.log(event.data.stageDetails.curStage);
+            changeStage(event.data.stageDetails.curStage, event.data.stageDetails.percentageSubRoute, event.data.stageDetails.coveredSubDistance, event.data.stageDetails.remainSubDistance, event.data.moveDirection, 6);
+            document.getElementById('curStage').textContent = document.getElementById('name' + event.data.stageDetails.curStage).textContent;
+            document.getElementById('speed').textContent = event.data.stageDetails.speed;
+            var timeTakenList = event.data.stageDetails.timeTakenToReach;
+            for (var i = 0; i < timeTakenList.length; i++) {
+                document.getElementById('reachTime' + i).textContent = timeTakenList[i];
+            }
+        }
+    };
+
+    // Error handling for web worker creation
+    locationUpdaterWorker.onerror = function (error) {
+        console.error("An error occurred in the locationUpdaterWorker:", error);
+    };
+</script>
+{% endblock %}

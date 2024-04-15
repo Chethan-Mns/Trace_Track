@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TraceTrack</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css"
+          integrity="sha384-JcKb8q3iqJ61gNV9KGb8thSsNjpSL0n8PARn9HuZOnIxN0hoP+VmmDGMN5t9UJ0Z" crossorigin="anonymous">
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"
+            integrity="sha384-DfXdz2htPH0lsSSs5nCTpuj/zy4C+OGpamoFVy38MVBnE+IbbVYUew+OrCXaRkfj"
+            crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js"
+            integrity="sha384-9/reFTGAW83EW2RDu2S0VKaIzap3H66lZH81PoYlFhbGU+6BZp6G7niu735Sk7lN"
+            crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"
+            integrity="sha384-B4gt1jrGC7Jh4AgTPSdUtOBvfO8shuf57BaghqFfPlYxofvL8/KUEfYiJOMMV+rV"
+            crossorigin="anonymous"></script>
+    <script src="https://kit.fontawesome.com/e68a43c0dc.js" crossorigin="anonymous"></script>
+    <link rel="stylesheet" href="{{ url_for('static',filename='css/nav.css') }}">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Pacifico&display=swap">
+
+</head>
+
+<body>
+<nav class="navbar navbar-expand-lg navbar-light ">
+    <a class="navbar-brand nav-logo-text" href="/">TraceTrack</a>
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNavAltMarkup"
+            aria-controls="navbarNavAltMarkup" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
+        <div class="navbar-nav ml-auto pr-5 mr-5">
+            <a class="nav-link active nav-sub-text " href="/">Home <span class="sr-only">(current)</span></a>
+            {% if current_user=='Admin' %}
+                <a class="nav-link active nav-sub-text " href="/adminDashboard/">Dashboard<span class="sr-only">(current)</span></a>
+            {% endif %}
+            {% if current_user %}
+                <button class="signin-button" onclick="logout()">Log out</button>
+            {% else %}
+                <button class="signin-button">Log in</button>
+            {% endif %}
+        </div>
+    </div>
+</nav>
+{% block home %}
+{% endblock %}
+{% block trackOnLine %}
+{% endblock %}
+{% block trackOnMap %}
+{% endblock %}
+
+<div class="footer-main-bg">
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-12 col-md-5">
+                <div class="footer-sub-first">
+                    <img src="{{ url_for('static',filename='images/innosapient.png') }}" class="innosapient-img"/>
+                    <h6 class="footer-sub-first-text">Where we track the bus routes through our application</h6>
+                </div>
+                <hr class="d-md-none">
+            </div>
+            <div class="col-12 col-md-4">
+                <div class="footer-sub-second">
+                    <h6 class="footer-sub-second-heading">
+                        COMPANY
+                    </h6>
+                    <P class="footer-sub-second-sub-text">About Us</P>
+                    <p class="footer-sub-second-sub-text"> Partner program</p>
+                    <p class="footer-sub-second-sub-text">Career</p>
+                    <p class="footer-sub-second-sub-text">Contact us</p>
+                    <p class="footer-sub-second-sub-text">Privacy Policy</p>
+                </div>
+                <hr class="d-md-none">
+            </div>
+            <div class="col-12 col-md-3">
+                <div class="footer-sub-third">
+                    <p class="footer-sub-third-heading">
+                        Contact
+                    </p>
+                    <div>
+                        <img src="{{ url_for('static',filename='images/mailbox.png') }}"/><span
+                            class="footer-sub-third-mail">support@bustrack.com</span>
+                    </div>
+                </div>
+                <hr class="d-md-none">
+            </div>
+            <div class="copy-rights">
+                © 2024 Bus Track, Inc. All rights reserved.
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+<script src="/static/js/logout.js"></script>
+</html>
